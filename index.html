@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE RACE - HSK 2 Vocabulary Challenge</title>
+  <style>
+    :root {
+      --primary-yellow: #FFD000;
+      --primary-dark-yellow: #E6B800;
+      --bg-light-yellow: #FFFDF0;
+      --accent-orange: #FF8800;
+      --dark-text: #2C2C2C;
+      --light-text: #FFFFFF;
+      --card-bg: #FFFFFF;
+      --correct-green: #2E7D32;
+      --correct-bg: #E8F5E9;
+      --wrong-red: #C62828;
+      --wrong-bg: #FFEBEE;
+      --border-radius: 16px;
+      --shadow: 0 8px 24px rgba(255, 180, 0, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-light-yellow);
+      color: var(--dark-text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    #game-container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 3px solid var(--primary-yellow);
+      overflow: hidden;
+      position: relative;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      padding: 24px;
+      flex-grow: 1;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Headers & Typography */
+    h1 {
+      font-size: 2.5rem;
+      color: var(--accent-orange);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 0px var(--primary-yellow);
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: #666;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--primary-yellow);
+      color: var(--dark-text);
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark-yellow);
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-secondary {
+      background: #E0E0E0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #D0D0D0;
+    }
+
+    /* Screen 1: Start Screen */
+    #start-screen {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .runner-icon {
+      font-size: 4rem;
+      margin-bottom: 10px;
+      animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    /* Screen 2: Category Selection */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 5px;
+    }
+
+    .cat-btn {
+      background: var(--bg-light-yellow);
+      border: 2px solid var(--primary-yellow);
+      border-radius: 12px;
+      padding: 12px 0;
+      font-weight: bold;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--dark-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cat-btn span {
+      font-size: 0.75rem;
+      color: #888;
+      font-weight: normal;
+    }
+
+    .cat-btn:hover {
+      background: var(--primary-yellow);
+      transform: scale(1.05);
+    }
+
+    /* Screen 3: Gameplay */
+    .race-track-container {
+      background: #FFF8D6;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--primary-yellow);
+    }
+
+    .race-track-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .track {
+      height: 20px;
+      background: #E0E0E0;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .runner-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-yellow), var(--accent-orange));
+      border-radius: 10px;
+      transition: width 0.4s ease-in-out;
+    }
+
+    .question-box {
+      background: var(--bg-light-yellow);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      border: 2px dashed var(--primary-yellow);
+    }
+
+    .question-type-badge {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      background: var(--primary-yellow);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .question-prompt {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .option-btn {
+      background: #FFF;
+      border: 2px solid #E0E0E0;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary-yellow);
+      background: var(--bg-light-yellow);
+    }
+
+    /* Feedback Overlay / Box */
+    .feedback-box {
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      display: none;
+      margin-bottom: 15px;
+    }
+
+    .feedback-box.correct {
+      background: var(--correct-bg);
+      color: var(--correct-green);
+      border: 1px solid var(--correct-green);
+    }
+
+    .feedback-box.incorrect {
+      background: var(--wrong-bg);
+      color: var(--wrong-red);
+      border: 1px solid var(--wrong-red);
+    }
+
+    .feedback-word {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-top: 4px;
+    }
+
+    /* Screen 4: Victory */
+    #victory-screen {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .victory-trophy {
+      font-size: 5rem;
+      animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+
+    @media (max-width: 480px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+      h1 { font-size: 2rem; }
+      .question-prompt { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  
+  <!-- SCREEN 1: START SCREEN -->
+  <div id="start-screen" class="screen active">
+    <div class="runner-icon">🏃💨</div>
+    <h1>THE RACE</h1>
+    <h2>HSK 2 Vocabulary Challenge</h2>
+    <button class="btn" onclick="showScreen('category-screen')">Start / Play</button>
+  </div>
+
+  <!-- SCREEN 2: CATEGORY SELECTION -->
+  <div id="category-screen" class="screen">
+    <div class="nav-header">
+      <button class="back-btn" onclick="showScreen('start-screen')">⬅</button>
+      <h2 style="margin:0;">Select Pinyin Category</h2>
+      <div style="width:24px;"></div>
+    </div>
+    <div class="category-grid" id="category-grid"></div>
+  </div>
+
+  <!-- SCREEN 3: GAMEPLAY -->
+  <div id="game-screen" class="screen">
+    <div class="nav-header">
+      <button class="back-btn" onclick="confirmExit()">⬅</button>
+      <span id="category-title" style="font-weight: bold; color: var(--accent-orange);"></span>
+      <div></div>
+    </div>
+
+    <div class="race-track-container">
+      <div class="race-track-info">
+        <span>Progress</span>
+        <span id="race-progress-text">0 / 0</span>
+      </div>
+      <div class="track">
+        <div class="runner-progress" id="runner-progress"></div>
+      </div>
+    </div>
+
+    <div class="question-box">
+      <div class="question-type-badge" id="question-badge">Type</div>
+      <div class="question-prompt" id="question-prompt">...</div>
+    </div>
+
+    <div class="options-grid" id="options-grid"></div>
+
+    <div id="feedback-box" class="feedback-box">
+      <div id="feedback-status" style="font-weight: bold;"></div>
+      <div id="feedback-detail" class="feedback-word"></div>
+    </div>
+
+    <button id="next-btn" class="btn" style="display: none; width: 100%; margin-top: auto;" onclick="nextQuestion()">Next Question ➔</button>
+  </div>
+
+  <!-- SCREEN 4: VICTORY -->
+  <div id="victory-screen" class="screen">
+    <div class="victory-trophy">🏆</div>
+    <h1>VICTORY!</h1>
+    <h2>You completed the category race!</h2>
+    <p id="victory-stats" style="margin-bottom: 15px; color: #555;"></p>
+    <div style="display:flex; gap: 10px;">
+      <button class="btn" onclick="restartCategory()">Play Again</button>
+      <button class="btn btn-secondary" onclick="showScreen('category-screen')">Categories</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Complete Dataset Extracted directly from PDF
+  const rawVocabulary = [
+    { stt: 1, hanzi: "啊", pinyin: "a", viet: "a, chà, à" },
+    { stt: 2, hanzi: "爱情", pinyin: "àiqíng", viet: "tình yêu" },
+    { stt: 3, hanzi: "安静", pinyin: "ānjìng", viet: "yên lặng" },
+    { stt: 4, hanzi: "爱人", pinyin: "àirén", viet: "vợ/ chồng" },
+    { stt: 5, hanzi: "安全", pinyin: "ānquán", viet: "an toàn" },
+    { stt: 6, hanzi: "白色", pinyin: "báisè", viet: "màu trắng" },
+    { stt: 7, hanzi: "班长", pinyin: "bānzhăng", viet: "lớp trưởng" },
+    { stt: 8, hanzi: "办", pinyin: "bàn", viet: "làm" },
+    { stt: 9, hanzi: "办法", pinyin: "bànfă", viet: "cách, phương pháp" },
+    { stt: 10, hanzi: "办公室", pinyin: "bàngōngshì", viet: "phòng làm việc" },
+    { stt: 11, hanzi: "半夜", pinyin: "bànyè", viet: "nửa đêm" },
+    { stt: 12, hanzi: "帮助", pinyin: "bāngzhù", viet: "giúp đỡ" },
+    { stt: 13, hanzi: "饱", pinyin: "bão", viet: "no, ăn no" },
+    { stt: 14, hanzi: "报名", pinyin: "bào//míng", viet: "đăng kí, báo danh" },
+    { stt: 15, hanzi: "报纸", pinyin: "bàozhĩ", viet: "báo (giấy)" },
+    { stt: 16, hanzi: "北方", pinyin: "běifāng", viet: "phương Bắc" },
+    { stt: 17, hanzi: "背", pinyin: "bèi", viet: "đọc thuộc" },
+    { stt: 18, hanzi: "比如", pinyin: "birú", viet: "ví dụ" },
+    { stt: 19, hanzi: "比如说", pinyin: "birúshuō", viet: "Nói ví dụ như..." },
+    { stt: 20, hanzi: "笔", pinyin: "bi", viet: "bút" },
+    { stt: 21, hanzi: "笔记", pinyin: "bīji", viet: "ghi chép" },
+    { stt: 22, hanzi: "笔记本", pinyin: "bijiběn", viet: "vở ghi chép" },
+    { stt: 23, hanzi: "必须", pinyin: "bixū", viet: "nhất định, phải" },
+    { stt: 24, hanzi: "边", pinyin: "biān", viet: "viền, cạnh bên" },
+    { stt: 25, hanzi: "变", pinyin: "biàn", viet: "thay đổi" },
+    { stt: 26, hanzi: "变成", pinyin: "biànchéng", viet: "trở thành, biến thành, thành ra" },
+    { stt: 27, hanzi: "遍", pinyin: "biàn", viet: "lần" },
+    { stt: 28, hanzi: "表", pinyin: "bião", viet: "đồng hồ" },
+    { stt: 29, hanzi: "表示", pinyin: "biǎoshì", viet: "bày tỏ, thể hiện" },
+    { stt: 30, hanzi: "不错", pinyin: "bùcuò", viet: "ổn, không tồi" },
+    { stt: 31, hanzi: "不但", pinyin: "bùdàn", viet: "không những..., không chỉ...." },
+    { stt: 32, hanzi: "不够", pinyin: "bùgòu", viet: "chưa đủ" },
+    { stt: 33, hanzi: "不过", pinyin: "bùguò", viet: "chẳng qua, nhưng mà" },
+    { stt: 34, hanzi: "不太", pinyin: "bù tài", viet: "không quá" },
+    { stt: 35, hanzi: "不要", pinyin: "bùyào", viet: "không cần, đừng" },
+    { stt: 36, hanzi: "不好意思", pinyin: "bù hǎoyisi", viet: "ngại quá, thật là ngại" },
+    { stt: 37, hanzi: "不久", pinyin: "bùjiŭ", viet: "không lâu" },
+    { stt: 38, hanzi: "不满", pinyin: "bùmăn", viet: "bất mãn, không hài lòng" },
+    { stt: 39, hanzi: "不如", pinyin: "bùrú", viet: "chăng bằng, hay là" },
+    { stt: 40, hanzi: "不少", pinyin: "bù shão", viet: "không ít, nhiều" },
+    { stt: 41, hanzi: "不同", pinyin: "bù tóng", viet: "không giống nhau" },
+    { stt: 42, hanzi: "不行", pinyin: "bùxíng", viet: "không ổn, không được" },
+    { stt: 43, hanzi: "不一定", pinyin: "bùyīdìng", viet: "chưa chắc" },
+    { stt: 44, hanzi: "不一会儿", pinyin: "bù yīhuìr", viet: "không lâu sau, mới một lát" },
+    { stt: 45, hanzi: "部分", pinyin: "bùfèn", viet: "phần" },
+    { stt: 46, hanzi: "才", pinyin: "cái", viet: "(đến lúc đó) mới" },
+    { stt: 47, hanzi: "菜单", pinyin: "càidān", viet: "thực đơn" },
+    { stt: 48, hanzi: "参观", pinyin: "cānguān", viet: "tham quan" },
+    { stt: 49, hanzi: "参加", pinyin: "cānjiā", viet: "tham gia" },
+    { stt: 50, hanzi: "草", pinyin: "cão", viet: "cỏ" },
+    { stt: 51, hanzi: "草地", pinyin: "căodi", viet: "bãi cỏ" },
+    { stt: 52, hanzi: "层", pinyin: "céng", viet: "tầng, lớp" },
+    { stt: 53, hanzi: "查", pinyin: "chá", viet: "tìm, tra cứu" },
+    { stt: 54, hanzi: "差不多", pinyin: "chàbùduō", viet: "đại khái, xấp xỉ" },
+    { stt: 55, hanzi: "长", pinyin: "cháng", viet: "dài" },
+    { stt: 56, hanzi: "常见", pinyin: "cháng jiàn", viet: "thường thấy" },
+    { stt: 57, hanzi: "常用", pinyin: "cháng yòng", viet: "thường dùng, thông dụng" },
+    { stt: 58, hanzi: "场", pinyin: "chăng", viet: "sân, bãi, cuộc" },
+    { stt: 59, hanzi: "超过", pinyin: "chãoguò", viet: "hơn, vượt qua" },
+    { stt: 60, hanzi: "超市", pinyin: "chãoshì", viet: "siêu thị" },
+    { stt: 61, hanzi: "车辆", pinyin: "chēliàng", viet: "xe/ phương tiện giao thông" },
+    { stt: 62, hanzi: "称", pinyin: "chēng", viet: "gọi, xưng hô" },
+    { stt: 63, hanzi: "成", pinyin: "chéng", viet: "thành, hoàn thành" },
+    { stt: 64, hanzi: "成绩", pinyin: "chéngjì", viet: "thành tích, thành tựu" },
+    { stt: 65, hanzi: "成为", pinyin: "chéngwéi", viet: "trở thành, biến thành" },
+    { stt: 66, hanzi: "重复", pinyin: "chóngfù", viet: "lặp lại, trùng lặp" },
+    { stt: 67, hanzi: "重新", pinyin: "chóngxĩn", viet: "làm lại từ đầu" },
+    { stt: 68, hanzi: "出发", pinyin: "chūfā", viet: "xuất phát" },
+    { stt: 69, hanzi: "出国", pinyin: "chū//guó", viet: "xuất ngoại, ra nước ngoài" },
+    { stt: 70, hanzi: "出口", pinyin: "chū kõu", viet: "lối ra" },
+    { stt: 71, hanzi: "出门", pinyin: "chū//mén", viet: "đi ra ngoài, ra khỏi nhà" },
+    { stt: 72, hanzi: "出生", pinyin: "chūshēng", viet: "sinh ra, ra đời" },
+    { stt: 73, hanzi: "出现", pinyin: "chūxiàn", viet: "xuất hiện" },
+    { stt: 74, hanzi: "出院", pinyin: "chū//yuàn", viet: "xuất viện, ra viện" },
+    { stt: 75, hanzi: "出租", pinyin: "chū zū", viet: "cho thuê, cho mướn" },
+    { stt: 76, hanzi: "出租车", pinyin: "chū zũ chẽ", viet: "xe cho thuê" },
+    { stt: 77, hanzi: "船", pinyin: "chuán", viet: "thuyền, tàu" },
+    { stt: 78, hanzi: "吹", pinyin: "chuī", viet: "thổi, hà hơi, sấy" },
+    { stt: 79, hanzi: "春节", pinyin: "Chūnjié", viet: "Tết âm lịch, tết Nguyên Đán" },
+    { stt: 80, hanzi: "春天", pinyin: "chūntiān", viet: "mùa xuân" },
+    { stt: 81, hanzi: "词", pinyin: "cí", viet: "từ" },
+    { stt: 82, hanzi: "词典", pinyin: "cídiăn", viet: "từ điển" },
+    { stt: 83, hanzi: "词语", pinyin: "cíyŭ", viet: "từ ngữ" },
+    { stt: 84, hanzi: "从小", pinyin: "cóngxião", viet: "từ nhỏ, từ bé" },
+    { stt: 85, hanzi: "答应", pinyin: "dāying", viet: "trả lời, đồng ý" },
+    { stt: 86, hanzi: "打工", pinyin: "dă//gōng", viet: "làm công, làm thêm" },
+    { stt: 87, hanzi: "打算", pinyin: "dă suàn", viet: "định; dự toán" },
+    { stt: 88, hanzi: "打印", pinyin: "dăyìn", viet: "in, photo" },
+    { stt: 89, hanzi: "大部分", pinyin: "dàbùfèn", viet: "đa số, phần lớn" },
+    { stt: 90, hanzi: "大大", pinyin: "dàdà", viet: "rất, cực kỳ, vượt bậc" },
+    { stt: 91, hanzi: "大多数", pinyin: "dàduōshù", viet: "đại đa số, phần lớn, số đông" },
+    { stt: 92, hanzi: "大海", pinyin: "dàhăi", viet: "biển cả, đại dương" },
+    { stt: 93, hanzi: "大家", pinyin: "dàjiā", viet: "mọi người" },
+    { stt: 94, hanzi: "大量", pinyin: "dàliàng", viet: "nhiều, lượng lớn, hàng loạt" },
+    { stt: 95, hanzi: "大门", pinyin: "dàmén", viet: "cổng, cửa chính" },
+    { stt: 96, hanzi: "大人", pinyin: "dàrén", viet: "người lớn" },
+    { stt: 97, hanzi: "大声", pinyin: "dà shēng", viet: "nói to, lớn tiếng" },
+    { stt: 98, hanzi: "大小", pinyin: "dàxião", viet: "khổ, cỡ" },
+    { stt: 99, hanzi: "大衣", pinyin: "dàyī", viet: "áo khoác ngoài" },
+    { stt: 100, hanzi: "大自然", pinyin: "dàzìrán", viet: "thiên nhiên, giới thiên nhiên" },
+    { stt: 101, hanzi: "带", pinyin: "dài", viet: "mang theo, đem theo, dẫn" },
+    { stt: 102, hanzi: "带来", pinyin: "dài lái", viet: "đem lại, mang tới" },
+    { stt: 103, hanzi: "单位", pinyin: "dānwèi", viet: "đơn vị" },
+    { stt: 104, hanzi: "但", pinyin: "dàn", viet: "nhưng" },
+    { stt: 105, hanzi: "但是", pinyin: "dànshì", viet: "nhưng mà" },
+    { stt: 106, hanzi: "蛋", pinyin: "dàn", viet: "trứng" },
+    { stt: 107, hanzi: "当", pinyin: "dāng", viet: "làm, đảm nhiệm" },
+    { stt: 108, hanzi: "当时", pinyin: "dāngshí", viet: "lúc đó, khi đó" },
+    { stt: 109, hanzi: "倒", pinyin: "dão", viet: "ngã, đổ" },
+    { stt: 110, hanzi: "到处", pinyin: "dàochù", viet: "khắp nơi, mọi nơi" },
+    { stt: 111, hanzi: "倒", pinyin: "dào", viet: "rót, đổ" },
+    { stt: 112, hanzi: "道", pinyin: "dào", viet: "con đường, đường" },
+    { stt: 113, hanzi: "道理", pinyin: "dào lĩ", viet: "đạo lý" },
+    { stt: 114, hanzi: "道路", pinyin: "dàolù", viet: "đường, đường phố" },
+    { stt: 115, hanzi: "得", pinyin: "de", viet: "biểu thị khả năng, sự có thể" },
+    { stt: 116, hanzi: "得出", pinyin: "déchū", viet: "thu được, đạt được" },
+    { stt: 117, hanzi: "的话", pinyin: "dehuà", viet: "nếu...." },
+    { stt: 118, hanzi: "得", pinyin: "dé", viet: "được, nhận được" },
+    { stt: 119, hanzi: "灯", pinyin: "dēng", viet: "đèn" },
+    { stt: 120, hanzi: "等", pinyin: "děng", viet: "trợ từ biểu thị sự liệt kê" },
+    { stt: 121, hanzi: "等到", pinyin: "děngdào", viet: "đến lúc, đến khi" },
+    { stt: 122, hanzi: "等于", pinyin: "děngyú", viet: "bằng, là" },
+    { stt: 123, hanzi: "低", pinyin: "dī", viet: "thấp" },
+    { stt: 124, hanzi: "地球", pinyin: "diqiú", viet: "Trái Đất, địa cầu" },
+    { stt: 125, hanzi: "地铁", pinyin: "ditiě", viet: "tàu điện ngầm" },
+    { stt: 126, hanzi: "地铁站", pinyin: "ditiězhàn", viet: "ga tàu điện ngầm" },
+    { stt: 127, hanzi: "点头", pinyin: "diǎntóu", viet: "gật đầu" },
+    { stt: 128, hanzi: "店", pinyin: "diàn", viet: "tiệm, quán, cửa hàng" },
+    { stt: 129, hanzi: "掉", pinyin: "diào", viet: "rơi, rớt, mất" },
+    { stt: 130, hanzi: "东北", pinyin: "dōngběi", viet: "Đông Bắc" },
+    { stt: 131, hanzi: "东方", pinyin: "dōngfāng", viet: "phương Đông" },
+    { stt: 132, hanzi: "东南", pinyin: "dōngnán", viet: "đông nam" },
+    { stt: 133, hanzi: "冬天", pinyin: "dōngtiān", viet: "mùa đông" },
+    { stt: 134, hanzi: "懂", pinyin: "dòng", viet: "hiểu" },
+    { stt: 135, hanzi: "懂得", pinyin: "dongde", viet: "hiểu được" },
+    { stt: 136, hanzi: "动物", pinyin: "dòngwù", viet: "động vật" },
+    { stt: 137, hanzi: "动物园", pinyin: "dòngwùyuán", viet: "vườn bách thú, sở thú" },
+    { stt: 138, hanzi: "读音", pinyin: "dúyīn", viet: "cách đọc, âm đọc" },
+    { stt: 139, hanzi: "度", pinyin: "dù", viet: "độ" },
+    { stt: 140, hanzi: "短", pinyin: "duăn", viet: "ngắn" },
+    { stt: 141, hanzi: "短信", pinyin: "duǎnxìn", viet: "tin nhắn" },
+    { stt: 142, hanzi: "段", pinyin: "duàn", viet: "đoạn, quãng, khúc" },
+    { stt: 143, hanzi: "队", pinyin: "duì", viet: "đội, nhóm" },
+    { stt: 144, hanzi: "队长", pinyin: "duì zhăng", viet: "đội trưởng, nhóm trưởng" },
+    { stt: 145, hanzi: "对", pinyin: "duì", viet: "đối với, đối đãi" },
+    { stt: 146, hanzi: "对话", pinyin: "duihuà", viet: "đối thoại, hội thoại" },
+    { stt: 147, hanzi: "对面", pinyin: "duìmiàn", viet: "đối diện" },
+    { stt: 148, hanzi: "多", pinyin: "duō", viet: "bao nhiêu, to nhường nào" },
+    { stt: 149, hanzi: "多久", pinyin: "duōjiŭ", viet: "bao lâu" },
+    { stt: 150, hanzi: "多么", pinyin: "duõme", viet: "bao nhiêu, bao xa" },
+    { stt: 151, hanzi: "多数", pinyin: "duōshù", viet: "đa số, phần đông, số nhiều" },
+    { stt: 152, hanzi: "多云", pinyin: "duōyún", viet: "nhiều mây" },
+    { stt: 153, hanzi: "而且", pinyin: "érqiě", viet: "mà còn, với lại, hơn nữa" },
+    { stt: 154, hanzi: "发", pinyin: "fa", viet: "phát, gửi" },
+    { stt: 155, hanzi: "饭馆", pinyin: "fànguăn", viet: "cửa hàng ăn, tiệm cơm" },
+    { stt: 156, hanzi: "发现", pinyin: "fāxiàn", viet: "phát hiện" },
+    { stt: 157, hanzi: "方便", pinyin: "fāngbiàn", viet: "thuận tiện" },
+    { stt: 158, hanzi: "方便面", pinyin: "fāngbiànmiàn", viet: "mì ăn liền, mì tôm" },
+    { stt: 159, hanzi: "方法", pinyin: "fangfă", viet: "phương pháp, cách" },
+    { stt: 160, hanzi: "方面", pinyin: "fāngmiàn", viet: "phương diện, khía cạnh" },
+    { stt: 161, hanzi: "方向", pinyin: "fāngxiàng", viet: "phương hướng" },
+    { stt: 162, hanzi: "放下", pinyin: "fàngxià", viet: "đặt xuống, thả xuống" },
+    { stt: 163, hanzi: "放心", pinyin: "fàng//xīn", viet: "yên tâm" },
+    { stt: 164, hanzi: "分", pinyin: "fen", viet: "phân, chia" },
+    { stt: 165, hanzi: "分开", pinyin: "fen//kāi", viet: "xa cách, tách biệt" },
+    { stt: 166, hanzi: "分数", pinyin: "fenshù", viet: "điểm số" },
+    { stt: 167, hanzi: "分钟", pinyin: "fēnzhōng", viet: "phút" },
+    { stt: 168, hanzi: "份", pinyin: "fèn", viet: "phần" },
+    { stt: 169, hanzi: "封", pinyin: "feng", viet: "phong, bìa, lá, bức" },
+    { stt: 170, hanzi: "服务", pinyin: "fúwù", viet: "phục vụ" },
+    { stt: 171, hanzi: "复习", pinyin: "fùxí", viet: "ôn tập" },
+    { stt: 172, hanzi: "该", pinyin: "gãi", viet: "nên" },
+    { stt: 173, hanzi: "改", pinyin: "găi", viet: "đổi, thay đổi, sửa" },
+    { stt: 174, hanzi: "改变", pinyin: "găibiàn", viet: "biến đổi, thay đổi" },
+    { stt: 175, hanzi: "干杯", pinyin: "gān//bēi", viet: "cạn ly, cạn chén" },
+    { stt: 176, hanzi: "感到", pinyin: "găndào", viet: "cảm thấy, thấy" },
+    { stt: 177, hanzi: "感动", pinyin: "găndòng", viet: "cảm động" },
+    { stt: 178, hanzi: "感觉", pinyin: "gǎnjué", viet: "cảm thấy; cảm nhận" },
+    { stt: 179, hanzi: "感谢", pinyin: "gănxiè", viet: "cảm ơn; lời cảm ơn" },
+    { stt: 180, hanzi: "干活儿", pinyin: "gàn//huór", viet: "làm việc nặng, lao động" },
+    { stt: 181, hanzi: "刚", pinyin: "gāng", viet: "vừa, vừa mới, chỉ mới" },
+    { stt: 182, hanzi: "刚才", pinyin: "gāngcái", viet: "vừa nãy, hồi nãy" },
+    { stt: 183, hanzi: "刚刚", pinyin: "gānggang", viet: "vừa, vừa hay, vừa vặn" },
+    { stt: 184, hanzi: "高级", pinyin: "gāojí", viet: "cao cấp" },
+    { stt: 185, hanzi: "高中", pinyin: "gāozhōng", viet: "cấp III" },
+    { stt: 186, hanzi: "个子", pinyin: "gèzi", viet: "vóc dáng, vóc người" },
+    { stt: 187, hanzi: "更", pinyin: "gèng", viet: "càng, thêm, hơn nữa" },
+    { stt: 188, hanzi: "公共汽车", pinyin: "gōnggòng qìchẽ", viet: "xe buýt công cộng" },
+    { stt: 189, hanzi: "公交车", pinyin: "gōngjiāoche", viet: "xe buýt công cộng" },
+    { stt: 190, hanzi: "公斤", pinyin: "gōngjīn", viet: "ki-lô-gram" },
+    { stt: 191, hanzi: "公里", pinyin: "gōngli", viet: "ki-lô-mét" },
+    { stt: 192, hanzi: "公路", pinyin: "gōnglù", viet: "đường cái, quốc lộ" },
+    { stt: 193, hanzi: "公平", pinyin: "gōngpíng", viet: "công bằng" },
+    { stt: 194, hanzi: "公司", pinyin: "gōngsī", viet: "công ty" },
+    { stt: 195, hanzi: "公园", pinyin: "gōngyuán", viet: "công viên" },
+    { stt: 196, hanzi: "狗", pinyin: "gou", viet: "chó, con chó" },
+    { stt: 197, hanzi: "够", pinyin: "gòu", viet: "đủ, đạt" },
+    { stt: 198, hanzi: "故事", pinyin: "gùshì", viet: "truyện, câu chuyện" },
+    { stt: 199, hanzi: "故意", pinyin: "gùyì", viet: "cố ý, cố tình" },
+    { stt: 200, hanzi: "顾客", pinyin: "gùkè", viet: "khách hàng" },
+    { stt: 201, hanzi: "关机", pinyin: "guānjī", viet: "tắt máy điện thoại" },
+    { stt: 202, hanzi: "关心", pinyin: "guānxīn", viet: "quan tâm" },
+    { stt: 203, hanzi: "观点", pinyin: "guāndiăn", viet: "quan điểm" },
+    { stt: 204, hanzi: "广场", pinyin: "guăngchăng", viet: "quảng trường" },
+    { stt: 205, hanzi: "广告", pinyin: "guănggào", viet: "quảng cáo" },
+    { stt: 206, hanzi: "国际", pinyin: "guójì", viet: "quốc tế" },
+    { stt: 207, hanzi: "过来", pinyin: "guò lái", viet: "đến, qua đây" },
+    { stt: 208, hanzi: "过年", pinyin: "guònián", viet: "ăn Tết, đón Tết" },
+    { stt: 209, hanzi: "过去", pinyin: "guòqù", viet: "qua đó" },
+    { stt: 210, hanzi: "过", pinyin: "guò", viet: "đã, từng" },
+    { stt: 211, hanzi: "海", pinyin: "hãi", viet: "biển" },
+    { stt: 212, hanzi: "海边", pinyin: "hãi biān", viet: "bờ biển" },
+    { stt: 213, hanzi: "喊", pinyin: "hăn", viet: "kêu, gọi" },
+    { stt: 214, hanzi: "好", pinyin: "hão", viet: "rất, quá" },
+    { stt: 215, hanzi: "好处", pinyin: "hãochù", viet: "điểm tốt, có ích" },
+    { stt: 216, hanzi: "好多", pinyin: "hǎoduō", viet: "rất nhiều" },
+    { stt: 217, hanzi: "好久", pinyin: "hǎojiŭ", viet: "rất lâu" },
+    { stt: 218, hanzi: "好人", pinyin: "hǎorén", viet: "người tốt" },
+    { stt: 219, hanzi: "好事", pinyin: "hǎoshì", viet: "chuyện tốt" },
+    { stt: 220, hanzi: "好像", pinyin: "hǎoxiàng", viet: "hình như" },
+    { stt: 221, hanzi: "合适", pinyin: "héshì", viet: "hợp, phù hợp" },
+    { stt: 222, hanzi: "河", pinyin: "hé", viet: "sông" },
+    { stt: 223, hanzi: "黑", pinyin: "hēi", viet: "đen" },
+    { stt: 224, hanzi: "黑板", pinyin: "hēibăn", viet: "bảng" },
+    { stt: 225, hanzi: "黑色", pinyin: "hēisè", viet: "màu đen" },
+    { stt: 226, hanzi: "红", pinyin: "hóng", viet: "đỏ" },
+    { stt: 227, hanzi: "红色", pinyin: "hóngsè", viet: "màu đỏ" },
+    { stt: 228, hanzi: "后来", pinyin: "hòulái", viet: "sau này" },
+    { stt: 229, hanzi: "忽然", pinyin: "hūrán", viet: "đột nhiên" },
+    { stt: 230, hanzi: "湖", pinyin: "hú", viet: "hồ" },
+    { stt: 231, hanzi: "护照", pinyin: "hùzhào", viet: "hộ chiếu" },
+    { stt: 232, hanzi: "花", pinyin: "hua", viet: "tiêu, dùng" },
+    { stt: 233, hanzi: "花园", pinyin: "huayuán", viet: "vườn hoa" },
+    { stt: 234, hanzi: "画", pinyin: "huà", viet: "vẽ" },
+    { stt: 235, hanzi: "画家", pinyin: "huàjiā", viet: "họa sĩ" },
+    { stt: 236, hanzi: "画儿", pinyin: "huàr", viet: "bức tranh" },
+    { stt: 237, hanzi: "坏处", pinyin: "huàichù", viet: "điểm xấu, có hại" },
+    { stt: 238, hanzi: "坏人", pinyin: "huàirén", viet: "người xấu" },
+    { stt: 239, hanzi: "欢迎", pinyin: "huānyíng", viet: "hoan nghênh" },
+    { stt: 240, hanzi: "换", pinyin: "huàn", viet: "đổi" },
+    { stt: 241, hanzi: "黄", pinyin: "huáng", viet: "vàng" },
+    { stt: 242, hanzi: "黄色", pinyin: "huángsè", viet: "màu vàng" },
+    { stt: 243, hanzi: "回", pinyin: "huí", viet: "lần, hồi" },
+    { stt: 244, hanzi: "回国", pinyin: "hui guó", viet: "về nước" },
+    { stt: 245, hanzi: "会", pinyin: "hui", viet: "hội" },
+    { stt: 246, hanzi: "活动", pinyin: "huódòng", viet: "hoạt động" },
+    { stt: 247, hanzi: "或", pinyin: "huò", viet: "hoặc, hay là" },
+    { stt: 248, hanzi: "或者", pinyin: "huòzhě", viet: "hoặc là" },
+    { stt: 249, hanzi: "机会", pinyin: "jī-hui", viet: "cơ hội" },
+    { stt: 250, hanzi: "鸡", pinyin: "jī", viet: "gà" },
+    { stt: 251, hanzi: "级", pinyin: "jí", viet: "cấp, bậc" },
+    { stt: 252, hanzi: "急", pinyin: "jí", viet: "vội" },
+    { stt: 253, hanzi: "计划", pinyin: "jìhuà", viet: "dự định, kế hoạch" },
+    { stt: 254, hanzi: "计算机", pinyin: "jisuànjī", viet: "máy tính" },
+    { stt: 255, hanzi: "加", pinyin: "jiā", viet: "thêm" },
+    { stt: 256, hanzi: "加油", pinyin: "jiāyóu", viet: "cố lên" },
+    { stt: 257, hanzi: "家", pinyin: "jiā", viet: "nhà (khoa học)" },
+    { stt: 258, hanzi: "家庭", pinyin: "jiātíng", viet: "gia đình" },
+    { stt: 259, hanzi: "家长", pinyin: "jiāzhăng", viet: "phụ huynh" },
+    { stt: 260, hanzi: "假", pinyin: "jiă", viet: "giả" },
+    { stt: 261, hanzi: "假期", pinyin: "jiàqī", viet: "kì nghỉ" },
+    { stt: 262, hanzi: "检查", pinyin: "jiǎnchá", viet: "kiểm tra" },
+    { stt: 263, hanzi: "见到", pinyin: "jiàndào", viet: "nhìn thấy" },
+    { stt: 264, hanzi: "见过", pinyin: "jiànguò", viet: "từng gặp" },
+    { stt: 265, hanzi: "件", pinyin: "jiàn", viet: "bộ, câu" },
+    { stt: 266, hanzi: "健康", pinyin: "jiànkāng", viet: "mạnh khỏe" },
+    { stt: 267, hanzi: "讲", pinyin: "jiăng", viet: "giảng, kể" },
+    { stt: 268, hanzi: "讲话", pinyin: "jiăng//huà", viet: "nói chuyện" },
+    { stt: 269, hanzi: "交", pinyin: "jiāo", viet: "giao, nộp" },
+    { stt: 270, hanzi: "交给", pinyin: "jiāo gěi", viet: "giao cho..." },
+    { stt: 271, hanzi: "交朋友", pinyin: "jiāo péngyǒu", viet: "kết bạn" },
+    { stt: 272, hanzi: "交通", pinyin: "jiāotōng", viet: "giao thông" },
+    { stt: 273, hanzi: "角", pinyin: "jião", viet: "góc, cạnh" },
+    { stt: 274, hanzi: "角度", pinyin: "jiǎodù", viet: "phía, góc độ" },
+    { stt: 275, hanzi: "饺子", pinyin: "jiǎozi", viet: "bánh chèo, sủi cảo" },
+    { stt: 276, hanzi: "脚", pinyin: "jião", viet: "chân" },
+    { stt: 277, hanzi: "叫作", pinyin: "jiàozuò", viet: "gọi là..." },
+    { stt: 278, hanzi: "教师", pinyin: "jiàoshī", viet: "giáo viên" },
+    { stt: 279, hanzi: "教室", pinyin: "jiàoshì", viet: "phòng học" },
+    { stt: 280, hanzi: "教学", pinyin: "jiàoxué", viet: "dạy học" },
+    { stt: 281, hanzi: "教育", pinyin: "jiàoyù", viet: "giáo dục" },
+    { stt: 282, hanzi: "接", pinyin: "jiē", viet: "đón, nhận" },
+    { stt: 283, hanzi: "接到", pinyin: "jiēdào", viet: "nhận được" },
+    { stt: 284, hanzi: "接受", pinyin: "jiēshòu", viet: "chấp nhận" },
+    { stt: 285, hanzi: "接下来", pinyin: "jiē xià lái", viet: "tiếp theo" },
+    { stt: 286, hanzi: "接着", pinyin: "jiēzhe", viet: "tiếp tục" },
+    { stt: 287, hanzi: "街", pinyin: "jiē", viet: "đường phố" },
+    { stt: 288, hanzi: "节", pinyin: "jié", viet: "ngày (lễ)" },
+    { stt: 289, hanzi: "节目", pinyin: "jiémù", viet: "tiết mục" },
+    { stt: 290, hanzi: "节日", pinyin: "jiérì", viet: "ngày lễ" },
+    { stt: 291, hanzi: "结果", pinyin: "jiéguõ", viet: "kết quả" },
+    { stt: 292, hanzi: "借", pinyin: "jiè", viet: "mượn" },
+    { stt: 293, hanzi: "斤", pinyin: "jīn", viet: "cân (1/2kg)" },
+    { stt: 294, hanzi: "今后", pinyin: "jīnhòu", viet: "sau này" },
+    { stt: 295, hanzi: "进入", pinyin: "jìnrù", viet: "nhập, vào" },
+    { stt: 296, hanzi: "进行", pinyin: "jìnxíng", viet: "tiến hành" },
+    { stt: 297, hanzi: "近", pinyin: "jin", viet: "gần" },
+    { stt: 298, hanzi: "经常", pinyin: "jīngcháng", viet: "thường xuyên" },
+    { stt: 299, hanzi: "经过", pinyin: "jīngguò", viet: "trải qua" },
+    { stt: 300, hanzi: "经理", pinyin: "jīngli", viet: "giám đốc" },
+    { stt: 301, hanzi: "酒", pinyin: "jiŭ", viet: "rượu" },
+    { stt: 302, hanzi: "酒店", pinyin: "jiŭdiàn", viet: "nhà nghỉ" },
+    { stt: 303, hanzi: "就要", pinyin: "jiùyào", viet: "sẽ, sắp" },
+    { stt: 304, hanzi: "举", pinyin: "jů", viet: "giơ, giương cao" },
+    { stt: 305, hanzi: "举手", pinyin: "jūshõu", viet: "giơ tay" },
+    { stt: 306, hanzi: "举行", pinyin: "jùxíng", viet: "tổ chức" },
+    { stt: 307, hanzi: "句", pinyin: "jù", viet: "câu" },
+    { stt: 308, hanzi: "句子", pinyin: "jùzi", viet: "câu" },
+    { stt: 309, hanzi: "卡", pinyin: "kă", viet: "thẻ, vé" },
+    { stt: 310, hanzi: "开机", pinyin: "kāijī", viet: "mở máy" },
+    { stt: 311, hanzi: "开心", pinyin: "kāixīn", viet: "vui vẻ" },
+    { stt: 312, hanzi: "开学", pinyin: "kāixué", viet: "khai giảng" },
+    { stt: 313, hanzi: "看法", pinyin: "kàn fă", viet: "cách nhìn" },
+    { stt: 314, hanzi: "考生", pinyin: "kǎoshēng", viet: "thí sinh" },
+    { stt: 315, hanzi: "靠", pinyin: "kào", viet: "dựa vào" },
+    { stt: 316, hanzi: "科", pinyin: "kē", viet: "môn, khoa" },
+    { stt: 317, hanzi: "科学", pinyin: "kēxué", viet: "khoa học" },
+    { stt: 318, hanzi: "可爱", pinyin: "kěài", viet: "đáng yêu" },
+    { stt: 319, hanzi: "可能", pinyin: "kěnéng", viet: "khả năng" },
+    { stt: 320, hanzi: "可怕", pinyin: "kěpà", viet: "đáng sợ" },
+    { stt: 321, hanzi: "可是", pinyin: "kěshì", viet: "nhưng mà" },
+    { stt: 322, hanzi: "可以", pinyin: "kěyi", viet: "có thể" },
+    { stt: 323, hanzi: "克", pinyin: "kè", viet: "gam" },
+    { stt: 324, hanzi: "刻", pinyin: "kè", viet: "15 phút" },
+    { stt: 325, hanzi: "客人", pinyin: "kè-rén", viet: "khách" },
+    { stt: 326, hanzi: "课堂", pinyin: "kètáng", viet: "trong lớp" },
+    { stt: 327, hanzi: "空气", pinyin: "kōngqì", viet: "không khí" },
+    { stt: 328, hanzi: "哭", pinyin: "kū", viet: "khóc" },
+    { stt: 329, hanzi: "快餐", pinyin: "kuàicān", viet: "bữa ăn nhanh" },
+    { stt: 330, hanzi: "快点儿", pinyin: "kuài diǎnr", viet: "nhanh lên" },
+    { stt: 331, hanzi: "快乐", pinyin: "kuàilè", viet: "vui vẻ" },
+    { stt: 332, hanzi: "快要", pinyin: "kuàiyào", viet: "sắp phải" },
+    { stt: 333, hanzi: "筷子", pinyin: "kuài zi", viet: "đũa" },
+    { stt: 334, hanzi: "拉", pinyin: "lā", viet: "kéo, lôi" },
+    { stt: 335, hanzi: "来自", pinyin: "láizi", viet: "đến từ..." },
+    { stt: 336, hanzi: "蓝", pinyin: "lán", viet: "xanh lam" },
+    { stt: 337, hanzi: "蓝色", pinyin: "lánsè", viet: "màu xanh lam" },
+    { stt: 338, hanzi: "篮球", pinyin: "lánqiú", viet: "bóng rổ" },
+    { stt: 339, hanzi: "老", pinyin: "lão", viet: "hay, thường" },
+    { stt: 340, hanzi: "老", pinyin: "lão", viet: "xưng hô thân mật" },
+    { stt: 341, hanzi: "老年", pinyin: "lăonián", viet: "tuổi già" },
+    { stt: 342, hanzi: "老朋友", pinyin: "lão péngyǒu", viet: "bạn cũ" },
+    { stt: 343, hanzi: "老是", pinyin: "lão shì", viet: "hay, thường" },
+    { stt: 344, hanzi: "离", pinyin: "lí", viet: "cách" },
+    { stt: 345, hanzi: "离开", pinyin: "líkāi", viet: "rời khỏi" },
+    { stt: 346, hanzi: "礼物", pinyin: "līwù", viet: "lễ vật, quà" },
+    { stt: 347, hanzi: "里头", pinyin: "litou", viet: "bên trong" },
+    { stt: 348, hanzi: "理想", pinyin: "lixiăng", viet: "ước mơ, lý tưởng" },
+    { stt: 349, hanzi: "例如", pinyin: "lìrú", viet: "ví dụ" },
+    { stt: 350, hanzi: "例子", pinyin: "lizi", viet: "ví dụ" },
+    { stt: 351, hanzi: "脸", pinyin: "liăn", viet: "mặt" },
+    { stt: 352, hanzi: "练", pinyin: "liàn", viet: "luyện" },
+    { stt: 353, hanzi: "练习", pinyin: "liànxí", viet: "luyện tập" },
+    { stt: 354, hanzi: "凉", pinyin: "liáng", viet: "mát" },
+    { stt: 355, hanzi: "凉快", pinyin: "liángkuài", viet: "mát mẻ" },
+    { stt: 356, hanzi: "两", pinyin: "liăng", viet: "hai" },
+    { stt: 357, hanzi: "亮", pinyin: "liàng", viet: "sáng" },
+    { stt: 358, hanzi: "辆", pinyin: "liàng", viet: "chiếc (xe)" },
+    { stt: 359, hanzi: "零下", pinyin: "líng xià", viet: "âm độ" },
+    { stt: 360, hanzi: "留", pinyin: "liú", viet: "giữ lại" },
+    { stt: 361, hanzi: "留下", pinyin: "liúxià", viet: "ở lại" },
+    { stt: 362, hanzi: "留学生", pinyin: "liúxuéshēng", viet: "du học sinh" },
+    { stt: 363, hanzi: "流", pinyin: "liú", viet: "chảy" },
+    { stt: 364, hanzi: "流利", pinyin: "liúli", viet: "trôi chảy" },
+    { stt: 365, hanzi: "流行", pinyin: "liúxíng", viet: "phổ biến" },
+    { stt: 366, hanzi: "路边", pinyin: "lù biān", viet: "vệ đường" },
+    { stt: 367, hanzi: "旅客", pinyin: "lūkė", viet: "khách du lịch" },
+    { stt: 368, hanzi: "旅行", pinyin: "lüxíng", viet: "du lịch" },
+    { stt: 369, hanzi: "旅游", pinyin: "lũyóu", viet: "du lịch" },
+    { stt: 370, hanzi: "绿", pinyin: "lù", viet: "xanh lá" },
+    { stt: 371, hanzi: "绿色", pinyin: "lüsè", viet: "màu xanh lá cây" },
+    { stt: 372, hanzi: "卖", pinyin: "mài", viet: "bán" },
+    { stt: 373, hanzi: "满", pinyin: "măn", viet: "đầy, tràn" },
+    { stt: 374, hanzi: "满意", pinyin: "mănyì", viet: "vừa ý" },
+    { stt: 375, hanzi: "猫", pinyin: "mão", viet: "mèo" },
+    { stt: 376, hanzi: "米", pinyin: "mi", viet: "mét" },
+    { stt: 377, hanzi: "面", pinyin: "miàn", viet: "mặt, nét mặt" },
+    { stt: 378, hanzi: "面", pinyin: "miàn", viet: "phương hướng" },
+    { stt: 379, hanzi: "面前", pinyin: "miànqián", viet: "trước mặt" },
+    { stt: 380, hanzi: "名", pinyin: "míng", viet: "vị" },
+    { stt: 381, hanzi: "名称", pinyin: "míngchēng", viet: "tên gọi" },
+    { stt: 382, hanzi: "名单", pinyin: "míngdān", viet: "danh sách" },
+    { stt: 383, hanzi: "明星", pinyin: "míngxīng", viet: "người nổi tiếng" },
+    { stt: 384, hanzi: "目的", pinyin: "mùdi", viet: "mục đích" },
+    { stt: 385, hanzi: "拿出", pinyin: "náchū", viet: "mang ra" },
+    { stt: 386, hanzi: "拿到", pinyin: "nádào", viet: "lấy được" },
+    { stt: 387, hanzi: "那", pinyin: "nà", viet: "vậy, còn" },
+    { stt: 388, hanzi: "那会儿", pinyin: "nàhuir", viet: "lúc ấy" },
+    { stt: 389, hanzi: "那么", pinyin: "nàme", viet: "vậy thì" },
+    { stt: 390, hanzi: "那时候", pinyin: "nà shíhòu", viet: "lúc đó" },
+    { stt: 391, hanzi: "那样", pinyin: "nàyàng", viet: "như vậy" },
+    { stt: 392, hanzi: "南方", pinyin: "nánfāng", viet: "miền Nam" },
+    { stt: 393, hanzi: "难过", pinyin: "nánguò", viet: "buồn bã" },
+    { stt: 394, hanzi: "难看", pinyin: "nánkàn", viet: "xấu xí" },
+    { stt: 395, hanzi: "难受", pinyin: "nánshòu", viet: "khó chịu" },
+    { stt: 396, hanzi: "难题", pinyin: "nántí", viet: "vấn đề khó" },
+    { stt: 397, hanzi: "难听", pinyin: "nántīng", viet: "khó nghe" },
+    { stt: 398, hanzi: "能够", pinyin: "nénggòu", viet: "có thể" },
+    { stt: 399, hanzi: "年级", pinyin: "niánjí", viet: "lớp" },
+    { stt: 400, hanzi: "年轻", pinyin: "niánqīng", viet: "trẻ trung" },
+    { stt: 401, hanzi: "乌", pinyin: "wū", viet: "đen, tối" },
+    { stt: 402, hanzi: "弄", pinyin: "nòng", viet: "làm, cầm" },
+    { stt: 403, hanzi: "努力", pinyin: "nŭli", viet: "nỗ lực" },
+    { stt: 404, hanzi: "爬山", pinyin: "pá shān", viet: "leo núi" },
+    { stt: 405, hanzi: "爬", pinyin: "pá", viet: "leo, trèo" },
+    { stt: 406, hanzi: "怕", pinyin: "pà", viet: "sợ" },
+    { stt: 407, hanzi: "排", pinyin: "pái", viet: "hàng" },
+    { stt: 408, hanzi: "排队", pinyin: "páiduì", viet: "xếp hàng" },
+    { stt: 409, hanzi: "排球", pinyin: "páiqiú", viet: "bóng chuyền" },
+    { stt: 410, hanzi: "碰", pinyin: "pèng", viet: "chạm" },
+    { stt: 411, hanzi: "碰到", pinyin: "pèngdào", viet: "chạm phải" },
+    { stt: 412, hanzi: "碰见", pinyin: "pèngjiàn", viet: "tình cờ gặp" },
+    { stt: 413, hanzi: "篇", pinyin: "piān", viet: "bài" },
+    { stt: 414, hanzi: "便宜", pinyin: "piányi", viet: "rẻ" },
+    { stt: 415, hanzi: "片", pinyin: "piàn", viet: "miếng, tấm" },
+    { stt: 416, hanzi: "漂亮", pinyin: "piàoliàng", viet: "đẹp, xinh đẹp" },
+    { stt: 417, hanzi: "平", pinyin: "ping", viet: "bằng phẳng" },
+    { stt: 418, hanzi: "平安", pinyin: "píng'ān", viet: "bình an" },
+    { stt: 419, hanzi: "平常", pinyin: "píngcháng", viet: "bình thường" },
+    { stt: 420, hanzi: "平等", pinyin: "píngděng", viet: "bình đẳng" },
+    { stt: 421, hanzi: "平时", pinyin: "píngshí", viet: "lúc thường" },
+    { stt: 422, hanzi: "瓶", pinyin: "píng", viet: "bình, lọ" },
+    { stt: 423, hanzi: "瓶子", pinyin: "píngzi", viet: "cái chai" },
+    { stt: 424, hanzi: "普通", pinyin: "putōng", viet: "bình thường" },
+    { stt: 425, hanzi: "普通话", pinyin: "putōnghuà", viet: "tiếng phổ thông" },
+    { stt: 426, hanzi: "其他", pinyin: "qítā", viet: "cái khác" },
+    { stt: 427, hanzi: "其中", pinyin: "qízhōng", viet: "trong đó" },
+    { stt: 428, hanzi: "骑", pinyin: "qí", viet: "cưỡi, đạp (xe)" },
+    { stt: 429, hanzi: "骑车", pinyin: "qí chẽ", viet: "đạp xe" },
+    { stt: 430, hanzi: "起飞", pinyin: "qifēi", viet: "cất cánh" },
+    { stt: 431, hanzi: "气", pinyin: "qì", viet: "khí, hơi" },
+    { stt: 432, hanzi: "气温", pinyin: "qiwēn", viet: "nhiệt độ" },
+    { stt: 433, hanzi: "千", pinyin: "qiān", viet: "nghìn" },
+    { stt: 434, hanzi: "千克", pinyin: "qiānkè", viet: "1kg" },
+    { stt: 435, hanzi: "前年", pinyin: "qiánnián", viet: "năm trước" },
+    { stt: 436, hanzi: "墙", pinyin: "qiáng", viet: "tường" },
+    { stt: 437, hanzi: "青年", pinyin: "qīngnián", viet: "thanh niên" },
+    { stt: 438, hanzi: "青少年", pinyin: "qīng-shàonián", viet: "thanh thiếu niên" },
+    { stt: 439, hanzi: "轻", pinyin: "qing", viet: "nhẹ" },
+    { stt: 440, hanzi: "清楚", pinyin: "qīngchŭ", viet: "rõ ràng" },
+    { stt: 441, hanzi: "晴", pinyin: "qíng", viet: "quang đãng" },
+    { stt: 442, hanzi: "晴天", pinyin: "qíngtiān", viet: "trời trong" },
+    { stt: 443, hanzi: "请客", pinyin: "qingkè", viet: "mời khách" },
+    { stt: 444, hanzi: "请求", pinyin: "qingqiú", viet: "thỉnh cầu" },
+    { stt: 445, hanzi: "秋天", pinyin: "qiūtiān", viet: "mùa thu" },
+    { stt: 446, hanzi: "求", pinyin: "qiú", viet: "xin, thỉnh cầu" },
+    { stt: 447, hanzi: "球场", pinyin: "qiúchăng", viet: "sân bóng" },
+    { stt: 448, hanzi: "球队", pinyin: "qiúdui", viet: "đội bóng" },
+    { stt: 449, hanzi: "球鞋", pinyin: "qiúxié", viet: "giầy thể thao" },
+    { stt: 450, hanzi: "取", pinyin: "qu", viet: "lấy" },
+    { stt: 451, hanzi: "取得", pinyin: "qudé", viet: "đạt được" },
+    { stt: 452, hanzi: "全", pinyin: "quán", viet: "tất cả, toàn bộ" },
+    { stt: 453, hanzi: "全部", pinyin: "quánbù", viet: "toàn bộ" },
+    { stt: 454, hanzi: "全国", pinyin: "quánguó", viet: "toàn quốc" },
+    { stt: 455, hanzi: "全家", pinyin: "quánjiā", viet: "cả gia đình" },
+    { stt: 456, hanzi: "全年", pinyin: "quánnián", viet: "cả năm" },
+    { stt: 457, hanzi: "全身", pinyin: "quánshēn", viet: "toàn thân" },
+    { stt: 458, hanzi: "全体", pinyin: "quánti", viet: "toàn thể" },
+    { stt: 459, hanzi: "然后", pinyin: "ránhòu", viet: "sau đó" },
+    { stt: 460, hanzi: "让", pinyin: "ràng", viet: "cho phép, khiến" },
+    { stt: 461, hanzi: "热情", pinyin: "rèqíng", viet: "nhiệt tình" },
+    { stt: 462, hanzi: "人口", pinyin: "rénkõu", viet: "dân số" },
+    { stt: 463, hanzi: "人们", pinyin: "rénmen", viet: "mọi người" },
+    { stt: 464, hanzi: "人数", pinyin: "rénshù", viet: "sĩ số" },
+    { stt: 465, hanzi: "认为", pinyin: "rènwéi", viet: "cho rằng" },
+    { stt: 466, hanzi: "日报", pinyin: "ribào", viet: "nhật báo" },
+    { stt: 467, hanzi: "日子", pinyin: "rizi", viet: "ngày" },
+    { stt: 468, hanzi: "如果", pinyin: "rúguǒ", viet: "nếu như" },
+    { stt: 469, hanzi: "入口", pinyin: "rù//kõu", viet: "lối vào" },
+    { stt: 470, hanzi: "商量", pinyin: "shāngliáng", viet: "thương lượng" },
+    { stt: 471, hanzi: "商人", pinyin: "shāngrén", viet: "doanh nhân" },
+    { stt: 472, hanzi: "上周", pinyin: "shàng zhōu", viet: "tuần trước" },
+    { stt: 473, hanzi: "少数", pinyin: "shǎoshù", viet: "thiểu số" },
+    { stt: 474, hanzi: "少年", pinyin: "shàonián", viet: "thiếu niên" },
+    { stt: 475, hanzi: "身边", pinyin: "shēnbiān", viet: "bên cạnh" },
+    { stt: 476, hanzi: "什么样", pinyin: "shénmeyàng", viet: "như thế nào" },
+    { stt: 477, hanzi: "生", pinyin: "shēng", viet: "sinh ra" },
+    { stt: 478, hanzi: "生词", pinyin: "shēngcí", viet: "từ mới" },
+    { stt: 479, hanzi: "生活", pinyin: "shēnghuó", viet: "cuộc sống" },
+    { stt: 480, hanzi: "声音", pinyin: "shēngyīn", viet: "âm thanh" },
+    { stt: 481, hanzi: "省", pinyin: "shěng", viet: "tỉnh" },
+    { stt: 482, hanzi: "省", pinyin: "shěng", viet: "tiết kiệm" },
+    { stt: 483, hanzi: "十分", pinyin: "shífen", viet: "rất" },
+    { stt: 484, hanzi: "实际", pinyin: "shíji", viet: "thực tế" },
+    { stt: 485, hanzi: "实习", pinyin: "shíxí", viet: "thực tập" },
+    { stt: 486, hanzi: "实现", pinyin: "shíxiàn", viet: "thực hiện" },
+    { stt: 487, hanzi: "实在", pinyin: "shízài", viet: "thật sự" },
+    { stt: 489, hanzi: "食物", pinyin: "shíwù", viet: "đồ ăn" },
+    { stt: 490, hanzi: "使用", pinyin: "shiyòng", viet: "sử dụng" },
+    { stt: 491, hanzi: "市", pinyin: "shi", viet: "thành phố" },
+    { stt: 492, hanzi: "市长", pinyin: "shizhăng", viet: "thị trưởng" },
+    { stt: 493, hanzi: "事情", pinyin: "shì qíng", viet: "sự việc" },
+    { stt: 494, hanzi: "收", pinyin: "shōu", viet: "thu dọn, nhận" },
+    { stt: 495, hanzi: "收到", pinyin: "shōudào", viet: "nhận được" },
+    { stt: 496, hanzi: "收入", pinyin: "shōurù", viet: "thu nhập" },
+    { stt: 497, hanzi: "手表", pinyin: "shoubião", viet: "đồng hồ" },
+    { stt: 498, hanzi: "受到", pinyin: "shòudào", viet: "nhận lấy" },
+    { stt: 499, hanzi: "舒服", pinyin: "shūfú", viet: "dễ chịu" },
+    { stt: 500, hanzi: "熟", pinyin: "shú / shóu", viet: "chín, quen" },
+    { stt: 501, hanzi: "数", pinyin: "shù", viet: "con số" },
+    { stt: 502, hanzi: "数字", pinyin: "shùzì", viet: "con số" },
+    { stt: 503, hanzi: "水平", pinyin: "shuǐpíng", viet: "trình độ" },
+    { stt: 504, hanzi: "顺利", pinyin: "shùnli", viet: "thuận lợi" },
+    { stt: 505, hanzi: "说明", pinyin: "shuōmíng", viet: "nói rõ" },
+    { stt: 506, hanzi: "司机", pinyin: "sīji", viet: "tài xế" },
+    { stt: 507, hanzi: "送到", pinyin: "sòngdào", viet: "gửi đi" },
+    { stt: 508, hanzi: "送给", pinyin: "sòng gěi", viet: "tặng cho" },
+    { stt: 509, hanzi: "算", pinyin: "suàn", viet: "tính" },
+    { stt: 510, hanzi: "虽然", pinyin: "suīrán", viet: "mặc dù" },
+    { stt: 511, hanzi: "随便", pinyin: "suíbiàn", viet: "tùy tiện" },
+    { stt: 512, hanzi: "随时", pinyin: "suíshí", viet: "bất cứ lúc nào" },
+    { stt: 513, hanzi: "所以", pinyin: "suǒyĩ", viet: "vậy nên" },
+    { stt: 514, hanzi: "所有", pinyin: "suǒyǒu", viet: "tất cả" },
+    { stt: 515, hanzi: "它", pinyin: "tā", viet: "nó" },
+    { stt: 516, hanzi: "它们", pinyin: "tāmen", viet: "chúng nó" },
+    { stt: 517, hanzi: "太太", pinyin: "tàitài", viet: "quý bà" },
+    { stt: 518, hanzi: "太阳", pinyin: "tài yáng", viet: "mặt trời" },
+    { stt: 519, hanzi: "讨论", pinyin: "tăolùn", viet: "thảo luận" },
+    { stt: 520, hanzi: "态度", pinyin: "tài dù", viet: "thái độ" },
+    { stt: 521, hanzi: "套", pinyin: "tào", viet: "bộ" },
+    { stt: 522, hanzi: "特别", pinyin: "tèbié", viet: "đặc biệt" },
+    { stt: 523, hanzi: "特点", pinyin: "tèdiăn", viet: "đặc điểm" },
+    { stt: 524, hanzi: "疼", pinyin: "téng", viet: "đau, nhức" },
+    { stt: 525, hanzi: "提", pinyin: "tí", viet: "xách, nhấc" },
+    { stt: 526, hanzi: "提出", pinyin: "tíchū", viet: "đưa ra" },
+    { stt: 527, hanzi: "提到", pinyin: "tídào", viet: "đề cập" },
+    { stt: 528, hanzi: "提高", pinyin: "tígão", viet: "nâng cao" },
+    { stt: 529, hanzi: "题", pinyin: "tí", viet: "đề bài" },
+    { stt: 530, hanzi: "体育", pinyin: "tiyù", viet: "thể dục" },
+    { stt: 531, hanzi: "体育场", pinyin: "třyùchăng", viet: "sân vận động" },
+    { stt: 532, hanzi: "体育馆", pinyin: "tiyùguǎn", viet: "cung thể thao" },
+    { stt: 533, hanzi: "天上", pinyin: "tiānshàng", viet: "bầu trời" },
+    { stt: 534, hanzi: "条", pinyin: "tiáo", viet: "cái, chiếc" },
+    { stt: 535, hanzi: "条件", pinyin: "tiáojiàn", viet: "điều kiện" },
+    { stt: 536, hanzi: "听讲", pinyin: "tīngjiăng", viet: "nghe giảng" },
+    { stt: 537, hanzi: "听说", pinyin: "tīngshuō", viet: "nghe nói" },
+    { stt: 538, hanzi: "停", pinyin: "tíng", viet: "ngừng, ngưng" },
+    { stt: 539, hanzi: "停车", pinyin: "tíngchẽ", viet: "dừng xe" },
+    { stt: 540, hanzi: "停车场", pinyin: "tíngchēchăng", viet: "bãi đỗ xe" },
+    { stt: 541, hanzi: "挺", pinyin: "ting", viet: "rất" },
+    { stt: 542, hanzi: "挺好", pinyin: "tĩng hão", viet: "rất tốt" },
+    { stt: 543, hanzi: "通", pinyin: "tông", viet: "thông suốt" },
+    { stt: 544, hanzi: "通过", pinyin: "tōngguò", viet: "thông qua" },
+    { stt: 545, hanzi: "通知", pinyin: "tōngzhĩ", viet: "thông báo" },
+    { stt: 546, hanzi: "同时", pinyin: "tóngshí", viet: "đồng thời" },
+    { stt: 547, hanzi: "同事", pinyin: "tóngshì", viet: "đồng nghiệp" },
+    { stt: 548, hanzi: "同样", pinyin: "tóngyàng", viet: "giống nhau" },
+    { stt: 549, hanzi: "头", pinyin: "tóu", viet: "đầu" },
+    { stt: 550, hanzi: "里头", pinyin: "litou", viet: "bên trong" },
+    { stt: 551, hanzi: "头发", pinyin: "tóufà", viet: "tóc" },
+    { stt: 552, hanzi: "图片", pinyin: "túpiàn", viet: "tranh ảnh" },
+    { stt: 553, hanzi: "推", pinyin: "tuī", viet: "đẩy" },
+    { stt: 554, hanzi: "腿", pinyin: "tui", viet: "chân" },
+    { stt: 555, hanzi: "外地", pinyin: "wàidi", viet: "nơi khác" },
+    { stt: 556, hanzi: "外卖", pinyin: "wàimài", viet: "đồ bán bên ngoài" },
+    { stt: 557, hanzi: "完", pinyin: "wán", viet: "hết, xong" },
+    { stt: 558, hanzi: "完成", pinyin: "wánchéng", viet: "hoàn thành" },
+    { stt: 559, hanzi: "完全", pinyin: "wánquán", viet: "hoàn toàn" },
+    { stt: 560, hanzi: "晚安", pinyin: "wăn'ān", viet: "chúc ngủ ngon" },
+    { stt: 561, hanzi: "晚报", pinyin: "wănbào", viet: "báo chiều" },
+    { stt: 562, hanzi: "晚餐", pinyin: "wăncān", viet: "bữa tối" },
+    { stt: 563, hanzi: "晚会", pinyin: "wănhui", viet: "dạ hội" },
+    { stt: 564, hanzi: "碗", pinyin: "wăn", viet: "bát, chén" },
+    { stt: 565, hanzi: "万", pinyin: "wàn", viet: "mười nghìn" },
+    { stt: 566, hanzi: "网", pinyin: "wăng", viet: "mạng Internet" },
+    { stt: 567, hanzi: "网球", pinyin: "wăngqiú", viet: "quần vợt" },
+    { stt: 568, hanzi: "网站", pinyin: "wăngzhàn", viet: "website" },
+    { stt: 569, hanzi: "往", pinyin: "wăng", viet: "hướng về" },
+    { stt: 570, hanzi: "为", pinyin: "wéi", viet: "vì" },
+    { stt: 571, hanzi: "为什么", pinyin: "wèi shénme", viet: "tại sao" },
+    { stt: 572, hanzi: "位", pinyin: "wèi", viet: "vị này" },
+    { stt: 573, hanzi: "味道", pinyin: "wèi dào", viet: "mùi vị" },
+    { stt: 574, hanzi: "喂", pinyin: "wèi", viet: "alo" },
+    { stt: 575, hanzi: "温度", pinyin: "wēndù", viet: "nhiệt độ" },
+    { stt: 576, hanzi: "闻", pinyin: "wén", viet: "ngửi" },
+    { stt: 577, hanzi: "问路", pinyin: "wènlù", viet: "hỏi đường" },
+    { stt: 578, hanzi: "问题", pinyin: "wèntí", viet: "vấn đề, câu hỏi" },
+    { stt: 579, hanzi: "午餐", pinyin: "wucān", viet: "cơm trưa" },
+    { stt: 580, hanzi: "午睡", pinyin: "wŭshuì", viet: "giấc ngủ trưa" },
+    { stt: 581, hanzi: "西北", pinyin: "xīběi", viet: "tây bắc" },
+    { stt: 582, hanzi: "西餐", pinyin: "xīcān", viet: "đồ ăn Tây" },
+    { stt: 583, hanzi: "西方", pinyin: "xīfāng", viet: "phương Tây" },
+    { stt: 584, hanzi: "西南", pinyin: "xīnán", viet: "tây nam" },
+    { stt: 585, hanzi: "西医", pinyin: "xīyī", viet: "Tây y" },
+    { stt: 586, hanzi: "习惯", pinyin: "xíguàn", viet: "thói quen" },
+    { stt: 587, hanzi: "洗衣机", pinyin: "xiyījī", viet: "máy giặt" },
+    { stt: 588, hanzi: "洗澡", pinyin: "xizão", viet: "tắm rửa" },
+    { stt: 589, hanzi: "下", pinyin: "xià", viet: "cái, lần" },
+    { stt: 590, hanzi: "下雪", pinyin: "xià xuě", viet: "tuyết rơi" },
+    { stt: 591, hanzi: "下周", pinyin: "xià zhōu", viet: "tuần sau" },
+    { stt: 592, hanzi: "夏天", pinyin: "xiàtiān", viet: "mùa hè" },
+    { stt: 593, hanzi: "相同", pinyin: "xiāngtóng", viet: "giống nhau" },
+    { stt: 594, hanzi: "相信", pinyin: "xiāngxìn", viet: "tin tưởng" },
+    { stt: 595, hanzi: "响", pinyin: "xiăng", viet: "vang lên" },
+    { stt: 596, hanzi: "想到", pinyin: "xiǎngdào", viet: "nghĩ đến" },
+    { stt: 597, hanzi: "想法", pinyin: "xiăng fă", viet: "suy nghĩ" },
+    { stt: 598, hanzi: "想起", pinyin: "xiǎngqi", viet: "nhớ ra" },
+    { stt: 599, hanzi: "向", pinyin: "xiàng", viet: "hướng, tới" },
+    { stt: 600, hanzi: "相机", pinyin: "xiàngjī", viet: "máy chụp hình" },
+    { stt: 601, hanzi: "像", pinyin: "xiàng", viet: "giống" },
+    { stt: 602, hanzi: "小", pinyin: "Xião", viet: "nhỏ" },
+    { stt: 603, hanzi: "小声", pinyin: "xiǎo shēng", viet: "nhỏ tiếng" },
+    { stt: 604, hanzi: "小时候", pinyin: "xiǎoshíhòu", viet: "lúc nhỏ" },
+    { stt: 605, hanzi: "小说", pinyin: "xiǎoshuō", viet: "tiểu thuyết" },
+    { stt: 606, hanzi: "小心", pinyin: "xiǎoxīn", viet: "cẩn thận" },
+    { stt: 607, hanzi: "小组", pinyin: "xiǎozů", viet: "tổ, nhóm nhỏ" },
+    { stt: 608, hanzi: "校园", pinyin: "xiàoyuán", viet: "vườn trường" },
+    { stt: 609, hanzi: "校长", pinyin: "xiàozhăng", viet: "hiệu trưởng" },
+    { stt: 610, hanzi: "笑话", pinyin: "xiàohua", viet: "cười nhạo" },
+    { stt: 611, hanzi: "笑话儿", pinyin: "xiàohuar", viet: "truyện cười" },
+    { stt: 612, hanzi: "鞋", pinyin: "xié", viet: "giày" },
+    { stt: 613, hanzi: "心里", pinyin: "xīn lĩ", viet: "trong lòng" },
+    { stt: 614, hanzi: "心情", pinyin: "xīnqing", viet: "tâm trạng" },
+    { stt: 615, hanzi: "心中", pinyin: "xīnzhōng", viet: "trong lòng" },
+    { stt: 616, hanzi: "新闻", pinyin: "xīnwén", viet: "tin tức" },
+    { stt: 617, hanzi: "信", pinyin: "xin", viet: "thư" },
+    { stt: 618, hanzi: "信号", pinyin: "xìnhào", viet: "tín hiệu" },
+    { stt: 619, hanzi: "信息", pinyin: "xìnxī", viet: "thông tin" },
+    { stt: 620, hanzi: "信心", pinyin: "xinxīn", viet: "lòng tin" },
+    { stt: 621, hanzi: "信用卡", pinyin: "xinyòngkă", viet: "thẻ tín dụng" },
+    { stt: 622, hanzi: "星星", pinyin: "xīngxīng", viet: "ngôi sao" },
+    { stt: 623, hanzi: "行动", pinyin: "xíngdòng", viet: "hành động" },
+    { stt: 624, hanzi: "行人", pinyin: "xíngrén", viet: "người đi đường" },
+    { stt: 625, hanzi: "行为", pinyin: "xíngwéi", viet: "hành vi" },
+    { stt: 626, hanzi: "姓", pinyin: "xìng", viet: "họ" },
+    { stt: 627, hanzi: "姓名", pinyin: "xìngmíng", viet: "họ tên" },
+    { stt: 628, hanzi: "休假", pinyin: "xiūjià", viet: "nghỉ phép" },
+    { stt: 629, hanzi: "许多", pinyin: "xŭduō", viet: "rất nhiều" },
+    { stt: 630, hanzi: "选", pinyin: "xuăn", viet: "chọn" },
+    { stt: 631, hanzi: "学期", pinyin: "xuéqī", viet: "học kỳ" },
+    { stt: 632, hanzi: "雪", pinyin: "xuě", viet: "tuyết" },
+    { stt: 633, hanzi: "颜色", pinyin: "yánsè", viet: "màu sắc" },
+    { stt: 634, hanzi: "眼", pinyin: "yăn", viet: "mắt" },
+    { stt: 635, hanzi: "眼睛", pinyin: "yǎnjing", viet: "mắt" },
+    { stt: 636, hanzi: "养", pinyin: "yăng", viet: "nuôi, dưỡng" },
+    { stt: 637, hanzi: "样子", pinyin: "yàngzi", viet: "dáng vẻ" },
+    { stt: 638, hanzi: "要求", pinyin: "yāoqiú", viet: "yêu cầu" },
+    { stt: 639, hanzi: "药", pinyin: "yào", viet: "thuốc" },
+    { stt: 640, hanzi: "药店", pinyin: "yàodiàn", viet: "tiệm thuốc" },
+    { stt: 641, hanzi: "药片", pinyin: "yàopiàn", viet: "viên thuốc" },
+    { stt: 642, hanzi: "药水", pinyin: "yàoshui", viet: "thuốc nước" },
+    { stt: 643, hanzi: "也许", pinyin: "yěxŭ", viet: "có thể" },
+    { stt: 644, hanzi: "夜", pinyin: "yè", viet: "đêm" },
+    { stt: 645, hanzi: "夜里", pinyin: "yè lĩ", viet: "giữa đêm" },
+    { stt: 646, hanzi: "一部分", pinyin: "yī bùfèn", viet: "một bộ phận" },
+    { stt: 647, hanzi: "一定", pinyin: "yīdìng", viet: "nhất định" },
+    { stt: 648, hanzi: "一共", pinyin: "yīgòng", viet: "tổng cộng" },
+    { stt: 649, hanzi: "一会儿", pinyin: "yīhuir", viet: "một lúc" },
+    { stt: 650, hanzi: "一路平安", pinyin: "yīlù-píng'ān", viet: "thượng lộ bình an" },
+    { stt: 651, hanzi: "一路顺风", pinyin: "yīlù-shùnfēng", viet: "thuận buồm xuôi gió" },
+    { stt: 652, hanzi: "已经", pinyin: "yijīng", viet: "đã, từng" },
+    { stt: 653, hanzi: "以后", pinyin: "yìhòu", viet: "sau này" },
+    { stt: 654, hanzi: "以前", pinyin: "yīqián", viet: "trước kia" },
+    { stt: 655, hanzi: "以上", pinyin: "yīshàng", viet: "trở lên" },
+    { stt: 656, hanzi: "以外", pinyin: "yīwài", viet: "ngoài ra" },
+    { stt: 657, hanzi: "以为", pinyin: "yiwéi", viet: "cho rằng" },
+    { stt: 658, hanzi: "以下", pinyin: "yīxià", viet: "trở xuống" },
+    { stt: 659, hanzi: "椅子", pinyin: "yizi", viet: "ghế" },
+    { stt: 660, hanzi: "一般", pinyin: "yībān", viet: "thông thường" },
+    { stt: 661, hanzi: "一点点", pinyin: "yī diǎndiǎn", viet: "một chút" },
+    { stt: 662, hanzi: "一生", pinyin: "yīshēng", viet: "một đời" },
+    { stt: 663, hanzi: "一直", pinyin: "yīzhí", viet: "luôn luôn" },
+    { stt: 664, hanzi: "亿", pinyin: "yì", viet: "trăm triệu" },
+    { stt: 665, hanzi: "意见", pinyin: "yì jiàn", viet: "ý kiến" },
+    { stt: 666, hanzi: "意思", pinyin: "yìsī", viet: "ý nghĩa" },
+    { stt: 667, hanzi: "因为", pinyin: "yīn wèi", viet: "bởi vì" },
+    { stt: 668, hanzi: "阴", pinyin: "yīn", viet: "âm u" },
+    { stt: 669, hanzi: "阴天", pinyin: "yīntiān", viet: "ngày âm u" },
+    { stt: 670, hanzi: "音节", pinyin: "yīnjié", viet: "âm tiết" },
+    { stt: 671, hanzi: "音乐", pinyin: "yīnyuè", viet: "âm nhạc" },
+    { stt: 672, hanzi: "音乐会", pinyin: "yīnyuèhui", viet: "buổi hòa nhạc" },
+    { stt: 673, hanzi: "银行", pinyin: "yínháng", viet: "ngân hàng" },
+    { stt: 674, hanzi: "银行卡", pinyin: "yínhángkă", viet: "thẻ ngân hàng" },
+    { stt: 675, hanzi: "应该", pinyin: "yīnggãi", viet: "nên, đáng" },
+    { stt: 676, hanzi: "英文", pinyin: "Yīngwén", viet: "ngôn ngữ Anh" },
+    { stt: 677, hanzi: "英语", pinyin: "Yīngyŭ", viet: "tiếng Anh" },
+    { stt: 678, hanzi: "影片", pinyin: "yingpiàn", viet: "phim truyện" },
+    { stt: 679, hanzi: "影响", pinyin: "yingxiăng", viet: "ảnh hưởng" },
+    { stt: 680, hanzi: "永远", pinyin: "yǒng yuǎn", viet: "mãi mãi" },
+    { stt: 681, hanzi: "油", pinyin: "yóu", viet: "dầu, mỡ" },
+    { stt: 682, hanzi: "游客", pinyin: "yóukè", viet: "du khách" },
+    { stt: 683, hanzi: "友好", pinyin: "yǒuhão", viet: "thân thiện" },
+    { stt: 684, hanzi: "有空儿", pinyin: "yõukongr", viet: "rảnh" },
+    { stt: 685, hanzi: "有人", pinyin: "yourén", viet: "có người" },
+    { stt: 686, hanzi: "有(一)点儿", pinyin: "you(yī)diǎnr", viet: "có một chút" },
+    { stt: 687, hanzi: "有意思", pinyin: "yǒu yìsī", viet: "có ý nghĩa, hay" },
+    { stt: 688, hanzi: "又", pinyin: "yòu", viet: "lại" },
+    { stt: 689, hanzi: "鱼", pinyin: "yú", viet: "cá" },
+    { stt: 690, hanzi: "语言", pinyin: "yŭyán", viet: "ngôn ngữ" },
+    { stt: 691, hanzi: "原来", pinyin: "yuánlái", viet: "ban đầu" },
+    { stt: 692, hanzi: "原因", pinyin: "yuányīn", viet: "nguyên nhân" },
+    { stt: 693, hanzi: "院", pinyin: "yuàn", viet: "viện" },
+    { stt: 694, hanzi: "院长", pinyin: "yuànzhăng", viet: "viện trưởng" },
+    { stt: 695, hanzi: "院子", pinyin: "yuànzi", viet: "sân vườn" },
+    { stt: 696, hanzi: "愿意", pinyin: "yuànyì", viet: "đồng ý" },
+    { stt: 697, hanzi: "月份", pinyin: "yuèfèn", viet: "tháng" },
+    { stt: 698, hanzi: "月亮", pinyin: "yuèliàng", viet: "mặt trăng" },
+    { stt: 699, hanzi: "越", pinyin: "yuè", viet: "vượt qua" },
+    { stt: 700, hanzi: "越来越", pinyin: "yuè lái yuè", viet: "càng ngày càng" },
+    { stt: 701, hanzi: "云", pinyin: "yún", viet: "mây" },
+    { stt: 702, hanzi: "运动", pinyin: "yùndòng", viet: "vận động" },
+    { stt: 703, hanzi: "咱", pinyin: "zán", viet: "tôi, ta" },
+    { stt: 704, hanzi: "咱们", pinyin: "zánmen", viet: "chúng ta" },
+    { stt: 705, hanzi: "脏", pinyin: "zāng", viet: "bẩn, dơ" },
+    { stt: 706, hanzi: "早餐", pinyin: "zǎocān", viet: "bữa sáng" },
+    { stt: 707, hanzi: "早晨", pinyin: "zǎochén", viet: "buổi sáng" },
+    { stt: 708, hanzi: "早就", pinyin: "zão jiù", viet: "sớm đã" },
+    { stt: 709, hanzi: "怎么办", pinyin: "zěnme bàn", viet: "làm thế nào" },
+    { stt: 710, hanzi: "怎么样", pinyin: "zěnmeyàng", viet: "như thế nào" },
+    { stt: 711, hanzi: "怎样", pinyin: "zěnyàng", viet: "làm sao" },
+    { stt: 712, hanzi: "占", pinyin: "zhàn", viet: "chiếm" },
+    { stt: 713, hanzi: "站", pinyin: "zhàn", viet: "đứng" },
+    { stt: 714, hanzi: "站住", pinyin: "zhànzhù", viet: "đứng lại" },
+    { stt: 715, hanzi: "长", pinyin: "cháng", viet: "dài" },
+    { stt: 716, hanzi: "长大", pinyin: "zhǎngdà", viet: "lớn lên" },
+    { stt: 717, hanzi: "找出", pinyin: "zhǎochū", viet: "tìm ra" },
+    { stt: 718, hanzi: "照顾", pinyin: "zhàogù", viet: "chăm sóc" },
+    { stt: 719, hanzi: "照片", pinyin: "zhàopiàn", viet: "bức ảnh" },
+    { stt: 720, hanzi: "照相", pinyin: "zhàoxiàng", viet: "chụp ảnh" },
+    { stt: 721, hanzi: "这么", pinyin: "zhème", viet: "như thế" },
+    { stt: 722, hanzi: "这时候/这时", pinyin: "zhè shíhòu", viet: "lúc này" },
+    { stt: 723, hanzi: "这样", pinyin: "zhèyàng", viet: "như vậy" },
+    { stt: 724, hanzi: "真正", pinyin: "zhēnzhèng", viet: "chân chính" },
+    { stt: 725, hanzi: "正常", pinyin: "zhèngcháng", viet: "bình thường" },
+    { stt: 726, hanzi: "正好", pinyin: "zhènghão", viet: "vừa vặn" },
+    { stt: 727, hanzi: "正确", pinyin: "zhèngquè", viet: "chính xác" },
+    { stt: 728, hanzi: "正是", pinyin: "zhèng shì", viet: "đúng là" },
+    { stt: 729, hanzi: "直接", pinyin: "zhíjiē", viet: "trực tiếp" },
+    { stt: 730, hanzi: "只", pinyin: "zhĩ", viet: "chỉ" },
+    { stt: 731, hanzi: "只能", pinyin: "zhǐ néng", viet: "chỉ có thể" },
+    { stt: 732, hanzi: "只要", pinyin: "zhǐyào", viet: "chỉ cần" },
+    { stt: 733, hanzi: "纸", pinyin: "zhĩ", viet: "giấy" },
+    { stt: 734, hanzi: "中餐", pinyin: "zhōngcân", viet: "bữa trưa" },
+    { stt: 735, hanzi: "中级", pinyin: "zhōngjí", viet: "trung cấp" },
+    { stt: 736, hanzi: "中年", pinyin: "zhōngnián", viet: "trung niên" },
+    { stt: 737, hanzi: "中小学", pinyin: "zhōng- xiǎoxué", viet: "tiểu học và trung học" },
+    { stt: 738, hanzi: "中心", pinyin: "zhōngxīn", viet: "trung tâm" },
+    { stt: 739, hanzi: "中医", pinyin: "zhōngyī", viet: "Đông y" },
+    { stt: 740, hanzi: "重点", pinyin: "zhòngdiăn", viet: "trọng điểm" },
+    { stt: 741, hanzi: "重视", pinyin: "zhòngshì", viet: "coi trọng" },
+    { stt: 742, hanzi: "周", pinyin: "zhōu", viet: "tuần" },
+    { stt: 743, hanzi: "周末", pinyin: "zhōumò", viet: "cuối tuần" },
+    { stt: 744, hanzi: "周年", pinyin: "zhōunián", viet: "tròn năm" },
+    { stt: 745, hanzi: "主人", pinyin: "zhű rén", viet: "chủ nhân" },
+    { stt: 746, hanzi: "主要", pinyin: "zhūyào", viet: "chủ yếu" },
+    { stt: 747, hanzi: "住房", pinyin: "zhùfáng", viet: "nhà ở" },
+    { stt: 748, hanzi: "住院", pinyin: "zhùyuàn", viet: "nằm viện" },
+    { stt: 749, hanzi: "装", pinyin: "zhuāng", viet: "đựng" },
+    { stt: 750, hanzi: "准确", pinyin: "zhŭnquè", viet: "chuẩn xác" },
+    { stt: 751, hanzi: "自己", pinyin: "ziji", viet: "tự bản thân" },
+    { stt: 752, hanzi: "自行车", pinyin: "zìxíngchē", viet: "xe đạp" },
+    { stt: 753, hanzi: "自由", pinyin: "ziyóu", viet: "tự do" },
+    { stt: 754, hanzi: "字典", pinyin: "zìdiăn", viet: "tự điển" },
+    { stt: 755, hanzi: "走过", pinyin: "zõuguò", viet: "đi qua" },
+    { stt: 756, hanzi: "走进", pinyin: "zõujin", viet: "đi vào" },
+    { stt: 757, hanzi: "走开", pinyin: "zõukāi", viet: "đi ra" },
+    { stt: 758, hanzi: "租", pinyin: "zū", viet: "thuê" },
+    { stt: 759, hanzi: "组", pinyin: "zů", viet: "tổ, nhóm" },
+    { stt: 760, hanzi: "组成", pinyin: "zŭchéng", viet: "cấu thành" },
+    { stt: 761, hanzi: "组长", pinyin: "zŭzhăng", viet: "tổ trưởng" },
+    { stt: 762, hanzi: "嘴", pinyin: "zui", viet: "miệng" },
+    { stt: 763, hanzi: "最近", pinyin: "zuijìn", viet: "gần đây" },
+    { stt: 764, hanzi: "作家", pinyin: "zuòjiā", viet: "tác giả, nhà văn" },
+    { stt: 765, hanzi: "作文", pinyin: "zuòwén", viet: "bài văn" },
+    { stt: 766, hanzi: "作业", pinyin: "zuòyè", viet: "bài tập" },
+    { stt: 767, hanzi: "作用", pinyin: "zuòyòng", viet: "công dụng" },
+    { stt: 768, hanzi: "座", pinyin: "zuò", viet: "tòa" },
+    { stt: 769, hanzi: "座位", pinyin: "zuò wèi", viet: "chỗ ngồi" },
+    { stt: 770, hanzi: "做到", pinyin: "zuòdào", viet: "làm được" },
+    { stt: 771, hanzi: "做法", pinyin: "zuò fă", viet: "cách làm" },
+    { stt: 772, hanzi: "做饭", pinyin: "zuòfàn", viet: "nấu cơm" }
+  ];
+
+  // Utility: Helper to clean Pinyin for letter categorization
+  function getFirstLetter(pinyin) {
+    const clean = pinyin.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    return clean.charAt(0).toUpperCase();
+  }
+
+  // Categorize database dynamically by First Letter
+  const categories = {};
+  rawVocabulary.forEach(item => {
+    const letter = getFirstLetter(item.pinyin);
+    if (!categories[letter]) {
+      categories[letter] = [];
+    }
+    categories[letter].push(item);
+  });
+
+  // State Variables
+  let currentCategoryKey = "";
+  let currentWords = [];
+  let currentQuestionIndex = 0;
+  let correctAnswersCount = 0;
+  let currentQuestionObj = null;
+
+  // Render Available Categories
+  function renderCategories() {
+    const grid = document.getElementById('category-grid');
+    grid.innerHTML = '';
+    const sortedKeys = Object.keys(categories).sort();
+
+    sortedKeys.forEach(letter => {
+      const count = categories[letter].length;
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn';
+      btn.innerHTML = `${letter} <span>(${count})</span>`;
+      btn.onclick = () => startRace(letter);
+      grid.appendChild(btn);
+    });
+  }
+
+  // Navigation Logic
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
+
+  function confirmExit() {
+    if (confirm("Quit this race and return to category selection?")) {
+      showScreen('category-screen');
+    }
+  }
+
+  // Game Core Functions
+  function startRace(letterCategory) {
+    currentCategoryKey = letterCategory;
+    currentWords = [...categories[letterCategory]];
+    // Shuffle array for randomness
+    currentWords.sort(() => Math.random() - 0.5);
+    
+    currentQuestionIndex = 0;
+    correctAnswersCount = 0;
+    
+    document.getElementById('category-title').innerText = `Category: ${letterCategory}`;
+    showScreen('game-screen');
+    loadQuestion();
+  }
+
+  function restartCategory() {
+    startRace(currentCategoryKey);
+  }
+
+  function updateProgress() {
+    const total = currentWords.length;
+    const progressPercent = Math.min(100, Math.round((currentQuestionIndex / total) * 100));
+    document.getElementById('runner-progress').style.width = `${progressPercent}%`;
+    document.getElementById('race-progress-text').innerText = `${currentQuestionIndex} / ${total}`;
+  }
+
+  function loadQuestion() {
+    updateProgress();
+    
+    // Check Victory
+    if (currentQuestionIndex >= currentWords.length) {
+      document.getElementById('victory-stats').innerText = `You mastered all ${currentWords.length} words in category ${currentCategoryKey}!`;
+      showScreen('victory-screen');
+      return;
+    }
+
+    // Hide Next Button and Reset Feedback
+    document.getElementById('next-btn').style.display = 'none';
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.style.display = 'none';
+    feedbackBox.className = 'feedback-box';
+
+    const targetWord = currentWords[currentQuestionIndex];
+    
+    // Select Random Question Type (4 Types)
+    const types = ['hanzi_to_en', 'en_to_hanzi', 'pinyin_to_hanzi', 'hanzi_to_pinyin'];
+    const selectedType = types[Math.floor(Math.random() * types.length)];
+    
+    currentQuestionObj = generateQuestionData(targetWord, selectedType);
+    
+    // Render UI
+    document.getElementById('question-badge').innerText = currentQuestionObj.typeLabel;
+    document.getElementById('question-prompt').innerText = currentQuestionObj.prompt;
+    
+    const optionsGrid = document.getElementById('options-grid');
+    optionsGrid.innerHTML = '';
+    
+    currentQuestionObj.options.forEach((opt) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerText = opt;
+      btn.onclick = () => checkAnswer(opt, currentQuestionObj.correctAnswer, targetWord);
+      optionsGrid.appendChild(btn);
+    });
+  }
+
+  function generateQuestionData(target, type) {
+    let prompt = "";
+    let typeLabel = "";
+    let correctAnswer = "";
+
+    // Generate 3 plausible distractors from whole dataset
+    const distractors = getDistractors(target);
+
+    switch(type) {
+      case 'hanzi_to_en':
+        typeLabel = "Chinese ➔ English";
+        prompt = target.hanzi;
+        correctAnswer = target.viet;
+        distractorsOptions = distractors.map(d => d.viet);
+        break;
+      case 'en_to_hanzi':
+        typeLabel = "English ➔ Chinese";
+        prompt = target.viet;
+        correctAnswer = target.hanzi;
+        distractorsOptions = distractors.map(d => d.hanzi);
+        break;
+      case 'pinyin_to_hanzi':
+        typeLabel = "Pinyin ➔ Chinese";
+        prompt = target.pinyin;
+        correctAnswer = target.hanzi;
+        distractorsOptions = distractors.map(d => d.hanzi);
+        break;
+      case 'hanzi_to_pinyin':
+        typeLabel = "Chinese ➔ Pinyin";
+        prompt = target.hanzi;
+        correctAnswer = target.pinyin;
+        distractorsOptions = distractors.map(d => d.pinyin);
+        break;
+    }
+
+    const options = [correctAnswer, ...distractorsOptions].sort(() => Math.random() - 0.5);
+
+    return { typeLabel, prompt, correctAnswer, options };
+  }
+
+  function getDistractors(target) {
+    const list = rawVocabulary.filter(item => item.stt !== target.stt);
+    list.sort(() => Math.random() - 0.5);
+    return list.slice(0, 3);
+  }
+
+  function checkAnswer(selected, correct, wordObj) {
+    const optionBtns = document.querySelectorAll('.option-btn');
+    optionBtns.forEach(btn => btn.disabled = true); // Disable further clicks
+
+    const feedbackBox = document.getElementById('feedback-box');
+    const status = document.getElementById('feedback-status');
+    const detail = document.getElementById('feedback-detail');
+
+    feedbackBox.style.display = 'block';
+
+    if (selected === correct) {
+      feedbackBox.className = 'feedback-box correct';
+      status.innerText = "正确！ (Correct!)";
+      detail.innerText = `${wordObj.hanzi} — ${wordObj.pinyin} — ${wordObj.viet}`;
+      correctAnswersCount++;
+    } else {
+      feedbackBox.className = 'feedback-box incorrect';
+      status.innerText = "Not quite!";
+      detail.innerText = `Correct Answer: ${wordObj.hanzi} — ${wordObj.pinyin} — ${wordObj.viet}`;
+    }
+
+    document.getElementById('next-btn').style.display = 'block';
+  }
+
+  function nextQuestion() {
+    currentQuestionIndex++;
+    loadQuestion();
+  }
+
+  // Initialize
+  window.onload = () => {
+    renderCategories();
+  };
+</script>
+</body>
+</html>
